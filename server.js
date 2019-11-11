@@ -57,13 +57,14 @@ const schema = makeExecutableSchema({
 const apolloServer = new ApolloServer({
 	schema, 
 	uploads: false,
-	playground: {
-	endpoint: '/graphql',
-	settings: {
-	  "editor.theme": "light"
-	}
   introspection: true,
-}});
+	playground: {
+	  endpoint: '/graphql',
+	  settings: {
+	    "editor.theme": "light"
+	  }
+  }
+});
 
 const app = express();
 const server = createServer(app);
