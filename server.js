@@ -7,6 +7,7 @@ const { SubscriptionServer } = require('subscriptions-transport-ws')
 const { PostgresPubSub } = require('graphql-postgres-subscriptions')
 const cors = require('cors');
 const bodyParser = require('body-parser')
+const { Client } = require('pg');
 
 const { Posts, sequelize } = require('./models');
 const PORT = process.env.PORT || 3000
@@ -20,13 +21,14 @@ const typeDefs = gql`
   type Subscription { postAdded: Post }
 `;
 
-const pubsub = new PostgresPubSub({
-  user: 'postgres',
-  host: HOST,
-  database: DATABASE_URL,
-  password: '',
-  port: '5432',
+const client = new Client({
+  connectionString: DATABASE_URL,
+  ssl: process.env.DATABASE_URL ? true : false,
 });
+
+client.connect();
+
+const pubsub = new PostgresPubSub({client});
 
 const resolvers = {
   Query: {
@@ -43,9 +45,9 @@ const resolvers = {
     }
   },
   Subscription: {
-	postAdded: {
+	  postAdded: {
 	    subscribe: () => pubsub.asyncIterator('postAdded')
-	}
+	  }
   },
 }
 
@@ -78,7 +80,8 @@ server.listen({ port: PORT }, () => {
 	new SubscriptionServer({
 	  schema,
 	  execute,
-	  subscribe
+	  subscribe,
+    keepAlive: 10000,
 	}, {
 	  server,
 	  path: '/graphql'
