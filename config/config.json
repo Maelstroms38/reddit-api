@@ -1,0 +1,22 @@
+{
+  "development": {
+    "database": "reddit_api_development",
+    "dialect": "postgres"
+  },
+  "test": {
+    "database": "reddit_api_test",
+    "dialect": "postgres"
+  },
+  "production": {
+    "use_env_variable": "DATABASE_URL",
+    "dialect": "postgres",
+    "dialectOptions": {
+      "ssl": true
+    },
+    "pool": {
+      "max": 5,
+      "min": 0,
+      "idle": 10000
+    }
+  }
+}
