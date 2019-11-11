@@ -11,6 +11,7 @@ const bodyParser = require('body-parser')
 const { Posts, sequelize } = require('./models');
 const PORT = process.env.PORT || 3000
 const HOST = process.env.HOST || 'localhost'
+const DATABASE_URL = process.env.DATABASE_URL || 'reddit_api_development'
 
 const typeDefs = gql`
   type Post { title: String!, link: String!, imageUrl: String, id: Int! }
@@ -22,7 +23,7 @@ const typeDefs = gql`
 const pubsub = new PostgresPubSub({
   user: 'postgres',
   host: HOST,
-  database: process.env.DATABASE_URL || 'reddit_api_development',
+  database: DATABASE_URL,
   password: '',
   port: '5432',
 });
@@ -61,6 +62,7 @@ const apolloServer = new ApolloServer({
 	settings: {
 	  "editor.theme": "light"
 	}
+  introspection: true,
 }});
 
 const app = express();
