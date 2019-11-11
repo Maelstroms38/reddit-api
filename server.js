@@ -21,7 +21,7 @@ const typeDefs = gql`
 
 const pubsub = new PostgresPubSub({
   user: 'postgres',
-  host: 'localhost',
+  host: HOST,
   database: process.env.DATABASE_URL || 'reddit_api_development',
   password: '',
   port: '5432',
