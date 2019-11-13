@@ -17,8 +17,10 @@ const DATABASE_URL = process.env.DATABASE_URL || 'reddit_api_development'
 const typeDefs = gql`
   type Post { title: String!, link: String!, imageUrl: String, id: Int! }
   type Query { posts: [Post] }
-  type Mutation { addPost(title: String!, link: String!, imageUrl: String!): Int }
-  type Subscription { postAdded: Post }
+  type Mutation { addPost(title: String!, link: String!, imageUrl: String!): Int,
+                  editPost(id: Int!, title: String!, link: String!, imageUrl: String!): Post,
+                  deletePost(id: Int!): Int }
+  type Subscription { postAdded: Post, postEdited: Post, postDeleted: Int }
 `;
 
 const client = new Client({
@@ -42,12 +44,39 @@ const resolvers = {
       const post = await Posts.create({title, link, imageUrl});
       pubsub.publish("postAdded", { postAdded: { id: post.id, title, link, imageUrl } });
       return post.id;
+    },
+    editPost: async (_, { id, title, link, imageUrl }) => {
+      const [updated] = await Posts.update({title, link, imageUrl}, {
+        where: { id: id }
+      });
+      if (updated) {
+        const updatedPost = await Posts.findOne({ where: { id: id } });
+        pubsub.publish("postEdited", { postEdited: updatedPost });
+        return updatedPost;
+      }
+      return new Error('Post not updated');
+    },
+    deletePost: async (_, { id }) => {
+      const deleted = await Posts.destroy({
+        where: { id: id }
+      });
+      if (deleted) {
+        pubsub.publish("postDeleted", { postDeleted: id });
+        return id;
+      }
+      return new Error('Post not deleted');
     }
   },
   Subscription: {
 	  postAdded: {
 	    subscribe: () => pubsub.asyncIterator('postAdded')
-	  }
+	  },
+    postEdited: {
+      subscribe: () => pubsub.asyncIterator('postEdited')
+    },
+    postDeleted: {
+      subscribe: () => pubsub.asyncIterator('postDeleted')
+    }
   },
 }
 
@@ -87,6 +116,5 @@ server.listen({ port: PORT }, () => {
 	  path: '/graphql'
 	})
 })
-
 console.log(`🚀 Server listening on http://${HOST}:${PORT}${apolloServer.graphqlPath}`)
 console.log(`🚀 Subscriptions ready at ws://${HOST}:${PORT}${apolloServer.subscriptionsPath}`)
