@@ -33,7 +33,7 @@ const pubsub = new PostgresPubSub({client});
 const resolvers = {
   Query: {
     posts: async () => {
-      const posts = await Posts.findAll()
+      const posts = await Posts.findAll({order: [['id', 'DESC']]})
       return posts
     },
   },
