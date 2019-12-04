@@ -92,12 +92,10 @@ const resolvers = {
 const server = new GraphQLServer({
   typeDefs,
   resolvers,
-  context: req  => {
-    const { connection: { context = null } = {}} = req;
+  context: request => {
     return {
-      req: req.request,
-      pubSub,
-      context,
+      ...request,
+      pubSub
     };
   },
 });
