@@ -9,8 +9,9 @@
     "db:reset": "npx sequelize-cli db:drop && npx sequelize-cli db:create && npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all"
   },
   "dependencies": {
-    "graphql-yoga": "1.18.3",
-    "graphql-postgres-subscriptions": "^1.0.5",
+    "apollo-server": "latest",
+    "graphql": "latest",
+    "graphql-postgres-subscriptions": "latest",
     "pg": "^7.12.1",
     "sequelize": "^5.21.2"
   },
