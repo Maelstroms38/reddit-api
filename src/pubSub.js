@@ -11,5 +11,6 @@ const client = new Client({
 client.connect();
 
 const pubSub = new PostgresPubSub({ client });
+pubSub.subscribe("error", console.error);
 
 module.exports = { pubSub }
